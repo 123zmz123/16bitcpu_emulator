@@ -11,10 +11,17 @@ class Memory():
         uint16_res = self.raw_mem[address]<<8 | self.raw_mem[address+1]
         return uint16_res
     
+    def setUint16(self,address,value):
+        value_h = ((value>>8) & 0xff)
+        value_l = (value & 0xff)
+        self.raw_mem[address]=value_h
+        self.raw_mem[address+1]=value_l
+    
 if __name__ == '__main__':
     mem = Memory(16)
     mem.raw_mem[0]=0x01
     mem.raw_mem[1]=0x02
     mem.raw_mem[2]=0x14
-    print(mem.getUint8(0))
-    print(hex(mem.getUint16(1)))
+    mem.setUint16(0,0x789a)
+    print(hex(mem.raw_mem[0]))
+    print(hex(mem.raw_mem[1]))
