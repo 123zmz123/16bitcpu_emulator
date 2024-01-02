@@ -1,6 +1,6 @@
 from memory import Memory
 from instr import Instruction
-ip=0;acc=1;r1=2;r2=3;r3=4;r4=5;r5=6;r6=7;r7=8;r8=9
+ip=0;acc=1;r1=2;r2=3;r3=4;r4=5;r5=6;r6=7;r7=8;r8=9;sp=10;fp=11
 class CPU():
     def __init__(self,memory:Memory) -> None:
         self.memory = memory
@@ -15,6 +15,8 @@ class CPU():
             r6:0,
             r7:0,
             r8:0,
+            sp:len(self.memory)-2,
+            fp:len(self.memory)-2,
         }
         self.registerNames = {
             ip:'ip',
@@ -27,16 +29,19 @@ class CPU():
             r6:'r6',
             r7:'r7',
             r8:'r8',
+            sp:'sp',
+            fp:'fp'
         }
+        self.stackFrameSize = 0
     
     def debug(self):
         for reg in self.registerNames:
             print(self.registerNames[reg]+":"+hex(self.registers[reg]))
         print("<================================>")
 
-    def viewMemoryAt(self,address):
+    def viewMemoryAt(self,address,n=8):
         res = hex(address)+':'
-        for i in range(8):
+        for i in range(n):
             res+=" "+hex(self.memory.raw_mem[address+i])
         print(res)
 
@@ -59,6 +64,55 @@ class CPU():
         instruction = self.memory.getUint16(nextInstructionAddress)
         self.setRegister(ip,nextInstructionAddress+2)
         return instruction
+    
+    def push(self,value):
+        spAddress = self.getRegister(sp)
+        self.memory.setUint16(spAddress,value)
+        self.setRegister(sp,spAddress-2)
+        self.stackFrameSize+=2
+
+    def pop(self):
+        nextSpAddress = self.getRegister(sp)+2
+        self.setRegister(sp,nextSpAddress)
+        self.stackFrameSize-=2
+        return self.memory.getUint16(nextSpAddress)
+    
+    def pushState(self):
+        self.push(self.getRegister(r1))
+        self.push(self.getRegister(r2))
+        self.push(self.getRegister(r3))
+        self.push(self.getRegister(r4))
+        self.push(self.getRegister(r5))
+        self.push(self.getRegister(r6))
+        self.push(self.getRegister(r7))
+        self.push(self.getRegister(r8))
+        self.push(self.getRegister(ip))
+        self.push(self.stackFrameSize+2)
+
+        self.setRegister(fp,self.getRegister(sp))
+        self.stackFrameSize = 0
+    
+    def popState(self):
+        framePointerAddress = self.getRegister(fp)
+        self.setRegister(sp,framePointerAddress)
+        self.stackFrameSize = self.pop()
+        stackFrameSize = self.stackFrameSize
+
+        self.setRegister(ip,self.pop())
+        self.setRegister(r8,self.pop())
+        self.setRegister(r7,self.pop())
+        self.setRegister(r6,self.pop())
+        self.setRegister(r5,self.pop())
+        self.setRegister(r4,self.pop())
+        self.setRegister(r3,self.pop())
+        self.setRegister(r2,self.pop())
+        self.setRegister(r1,self.pop())
+        
+        nArgs = self.pop()
+        for i in range(nArgs):
+            self.pop()
+        
+        self.setRegister(fp,framePointerAddress+stackFrameSize)
 
     def excute(self,instr):
         if(instr == Instruction.MOV_LIT_REG):
@@ -96,6 +150,34 @@ class CPU():
             address = self.fetch16()
             if (value != self.getRegister(acc)):
                 self.setRegister(ip,address)
+
+        elif (instr == Instruction.PSH_LIT):
+            value = self.fetch16()
+            self.push(value)
+
+        elif(instr == Instruction.PSH_REG):
+            reg = self.fetch()
+            self.push(self.getRegister(reg))
+        
+        elif(instr == Instruction.POP):
+            reg = self.fetch()
+            value = self.pop()
+            self.setRegister(reg,value)
+
+        elif(instr == Instruction.CAL_LIT):
+            address = self.fetch16()
+            self.pushState()
+            self.setRegister(ip,address)
+        
+        elif (instr == Instruction.CAL_REG):
+            reg = self.fetch()
+            address = self.getRegister(reg)
+            self.pushState()
+            self.setRegister(ip,address)
+
+        elif(instr == Instruction.RET):
+            self.popState()
+            
         else:
             pass
 

@@ -16,6 +16,8 @@ class Memory():
         value_l = (value & 0xff)
         self.raw_mem[address]=value_h
         self.raw_mem[address+1]=value_l
+    def __len__(self):
+        return len(self.raw_mem)
     
 if __name__ == '__main__':
     mem = Memory(16)
@@ -25,3 +27,5 @@ if __name__ == '__main__':
     mem.setUint16(0,0x789a)
     print(hex(mem.raw_mem[0]))
     print(hex(mem.raw_mem[1]))
+    print(len(mem))
+    
