@@ -4,7 +4,12 @@ class Instruction():
     MOV_REG_REG = 0x11
     MOV_REG_MEM = 0x12
     MOV_MEM_REG = 0x13
+    MOV_LIT_MEM = 0x1B
+    MOV_REG_PTR_REG = 0x1C
+    MOV_LIT_OFF_REG = 0x1D
+
     ADD_REG_REG = 0x14
+    ADD_LIT_REG = 0x3F
     JMP_NOT_EQ = 0x15
     PSH_LIT = 0x17
     PSH_REG = 0x18
@@ -12,3 +17,5 @@ class Instruction():
     CAL_LIT = 0x5E
     CAL_REG = 0x5F
     RET = 0x60
+    HLT = 0xFF
+

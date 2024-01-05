@@ -5,7 +5,6 @@ class Memory():
     
     def getUint8(self,address):
         return self.raw_mem[address]
-        pass
 
     def getUint16(self,address):
         uint16_res = self.raw_mem[address]<<8 | self.raw_mem[address+1]
@@ -16,6 +15,10 @@ class Memory():
         value_l = (value & 0xff)
         self.raw_mem[address]=value_h
         self.raw_mem[address+1]=value_l
+
+    def setUint8(self,address,value):
+        self.raw_mem[address] = value & 0xff
+        
     def __len__(self):
         return len(self.raw_mem)
     

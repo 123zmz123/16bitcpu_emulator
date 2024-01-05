@@ -1,8 +1,9 @@
 from memory import Memory
+from memorymapper import MemoryMapper
 from instr import Instruction
 ip=0;acc=1;r1=2;r2=3;r3=4;r4=5;r5=6;r6=7;r7=8;r8=9;sp=10;fp=11
 class CPU():
-    def __init__(self,memory:Memory) -> None:
+    def __init__(self,memory:MemoryMapper) -> None:
         self.memory = memory
         self.registers = {
             ip:0,
@@ -15,8 +16,8 @@ class CPU():
             r6:0,
             r7:0,
             r8:0,
-            sp:len(self.memory)-2,
-            fp:len(self.memory)-2,
+            sp:0xffff-1,
+            fp:0xffff-1
         }
         self.registerNames = {
             ip:'ip',
@@ -42,7 +43,7 @@ class CPU():
     def viewMemoryAt(self,address,n=8):
         res = hex(address)+':'
         for i in range(n):
-            res+=" "+hex(self.memory.raw_mem[address+i])
+            res+=" "+hex(self.memory.getUint8(address+i))
         print(res)
 
     def getRegister(self,name):
@@ -57,6 +58,7 @@ class CPU():
         nextInstructionAddress = self.registers[ip]
         instruction = self.memory.getUint8(nextInstructionAddress)
         self.setRegister(ip,nextInstructionAddress+1)
+        # print(hex(self.registers[ip]))
         return instruction
     
     def fetch16(self):
@@ -177,13 +179,25 @@ class CPU():
 
         elif(instr == Instruction.RET):
             self.popState()
-            
+
+        elif(instr == Instruction.HLT):
+            return True
         else:
             pass
+
+        return False
 
     def step(self):
         instr = self.fetch()
         self.excute(instr)
 
+    def run(self):
+        i = 0
+        while(True):
+            i+=1
+            # if (i>200):
+            #     break
+            if self.registers[ip] > 0xfff0:
+                break
+            self.step()
 
-    
