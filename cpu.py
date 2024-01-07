@@ -139,6 +139,27 @@ class CPU():
             registerTo = self.fetch()
             value = self.memory.getUint16(address)
             self.setRegister(registerTo,value)
+        
+        elif (instr == Instruction.MOV_LIT_MEM):
+            value = self.fetch16()
+            address = self.fetch16()
+            self.memory.setUint16(address,value)
+        
+        elif(instr == Instruction.MOV_REG_PTR_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            ptr = self.registers[r1]
+            value = self.memory.getUint16(ptr)
+            self.registers[r2]=value
+        
+        elif (instr == Instruction.MOV_LIT_OFF_REG):
+            baseAddress = self.fetch16()
+            r1 = self.fetch()
+            r2 = self.fetch()
+            offset = self.registers[r1]
+
+            value = self.memory.getUint16(baseAddress+offset)
+            self.registers[r2]=value
 
         elif (instr == Instruction.ADD_REG_REG):
             r1 = self.fetch()
@@ -147,11 +168,218 @@ class CPU():
             r2_value = self.getRegister(r2)
             self.setRegister(acc,r1_value+r2_value)
 
+        elif (instr == Instruction.ADD_LIT_REG):
+            literal = self.fetch16()
+            r1 = self.fetch()
+            registerValue = self.registers[r1]
+            self.setRegister(acc,literal+registerValue)
+        
+        elif (instr == Instruction.SUB_LIT_REG):
+            literal = self.fetch16()
+            r1 = self.fetch()
+            registerValue = self.registers[r1]
+            res = registerValue - literal
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.SUB_REG_LIT):
+            r1 = self.fetch()
+            literal = self.fetch16()
+            registerValue = self.registers[r1]
+            res = literal - registerValue
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.SUB_REG_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            reg1Value = self.registers[r1]
+            reg2Value = self.registers[r2]
+            res = reg1Value - reg2Value
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.MUL_LIT_REG):
+            literal = self.fetch16()
+            r1 = self.fetch()
+            regValue = self.registers[r1]
+            res = literal*regValue
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.MUL_REG_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            reg1Value = self.registers[r1]
+            reg2Value = self.registers[r2]
+            res = reg1Value*reg2Value
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.INC_REG):
+            r1 = self.fetch()
+            res = self.registers[r1]+1
+            self.setRegister(r1,res)
+        
+        elif(instr == Instruction.DEC_REG):
+            r1 = self.fetch()
+            res = self.registers[r1]-1
+            self.setRegister(r1,res)
+        
+        elif(instr == Instruction.LSF_REG_LIT):
+            r1 = self.fetch()
+            literal = self.fetch()
+            value = self.registers[r1]
+            res = value << literal
+            self.setRegister(r1,res)
+        
+        elif(instr == Instruction.LSF_REG_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            value = self.registers[r1]
+            shiftBy = self.registers[r2]
+            res = value << shiftBy
+            self.setRegister(r1,res)
+
+        elif(instr == Instruction.RSF_REG_LIT):
+            r1 = self.fetch()
+            literal = self.fetch()
+            value = self.registers[r1]
+            res = value >> literal
+            self.setRegister(r1,res)
+        
+        elif(instr == Instruction.RSF_REG_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            value = self.registers[r1]
+            shiftValue = self.registers[r2]
+            res = value >> shiftValue
+            self.setRegister(r1,res)
+        
+        elif(instr == Instruction.AND_REG_LIT):
+            r1 = self.fetch()
+            literal = self.fetch16()
+            registerValue = self.registers[r1]
+            res = registerValue & literal
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.ADD_REG_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            reg1Value = self.registers[r1]
+            reg2Value = self.registers[r2]
+            res = reg1Value & reg2Value
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.OR_REG_LIT):
+            r1 = self.fetch()
+            literal = self.fetch16()
+            regValue = self.registers[r1]
+            res = regValue | literal
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.OR_REG_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            reg1Value = self.registers[r1]
+            reg2Value = self.registers[r2]
+            res = reg1Value | reg2Value
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.XOR_REG_LIT):
+            reg = self.fetch()
+            literal = self.fetch16()
+            regValue = self.registers[reg]
+            res = regValue ^ literal
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.XOR_REG_REG):
+            r1 = self.fetch()
+            r2 = self.fetch()
+            reg1Value = self.registers[r1]
+            reg2Value = self.registers[r2]
+            res = reg1Value ^ reg2Value
+            self.setRegister(acc,res)
+        
+        elif(instr == Instruction.NOT):
+            reg = self.fetch()
+            regValue = self.registers[reg]
+            res = (~regValue) & 0xffff
+            self.setRegister(acc,res)
+
         elif (instr == Instruction.JMP_NOT_EQ):
             value = self.fetch16()
             address = self.fetch16()
             if (value != self.getRegister(acc)):
                 self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JNE_REG):
+            r1 = self.fetch()
+            value = self.registers[r1]
+            address = self.fetch16()
+            if(value != self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JEQ_LIT):
+            literal= self.fetch16()
+            address = self.fetch16()
+            if(literal== self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JEQ_REG):
+            r1 = self.fetch()
+            value = self.registers[r1]
+            address = self.fetch16()
+            if(value == self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JLT_LIT):
+            literal = self.fetch16()
+            address = self.fetch16()
+            if(literal < self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JLT_REG):
+            reg = self.fetch()
+            value = self.registers[reg]
+            address = self.fetch16()
+            if(value < self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JGT_LIT):
+            literal = self.fetch16()
+            address = self.fetch16()
+            if(literal > self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JGT_REG):
+            reg = self.fetch()
+            value = self.registers[reg]
+            address = self.fetch16()
+            if(value > self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JLE_LIT):
+            literal = self.fetch16()
+            address = self.fetch16()
+            if (literal <= self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JLE_REG):
+            reg = self.fetch()
+            value = self.registers[reg]
+            address = self.fetch16()
+            if(value <= self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JGE_LIT):
+            literal = self.fetch16()
+            address = self.fetch16()
+            if(value >= self.registers[acc]):
+                self.setRegister(ip,address)
+        
+        elif(instr == Instruction.JGE_REG):
+            reg = self.fetch()
+            value = self.registers[reg]
+            address = self.fetch16()
+            if(value >= self.registers[acc]):
+                self.setRegister(ip,address)
+        
 
         elif (instr == Instruction.PSH_LIT):
             value = self.fetch16()
@@ -199,5 +427,7 @@ class CPU():
             #     break
             if self.registers[ip] > 0xfff0:
                 break
-            self.step()
+            hlt = self.step()
+            if hlt:
+                break
 
