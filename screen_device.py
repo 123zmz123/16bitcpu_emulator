@@ -1,4 +1,4 @@
-
+import sys
 class Screen():
     def __init__(self):
         pass
@@ -21,8 +21,8 @@ class Screen():
     def setUint16(self,address,value):
         command = (value & 0xff00)>>8
         charValue = value & 0xff
-        y = address %16
-        x = address // 16 + 6
+        y = address %16 + 1
+        x = address // 16 + 2
         # print(x)
         # print(y)
         if (command ==  0xff):
@@ -32,7 +32,7 @@ class Screen():
         elif(command == 0x02):
             self.setRegular()
 
-        print("\033[{0};{1}H{2}".format(x,y,chr(charValue)))
+        sys.stdout.write("\033[{0};{1}H{2}".format(x,y,chr(charValue)))
         
 
 
@@ -48,7 +48,10 @@ if __name__ == "__main__":
     # print('\x1b[1m') # bold
     # print('\x1b[0m') # retangle
     s=Screen()
-    s.setUint16(0x01,0x0100 | (ord('@') & 0xff))
+    s.setUint16(16,0x0100 | (ord('+') & 0xff))
+    s.setUint16(17,0x0100 | (ord('+') & 0xff))
+    s.setUint16(18,0x0100 | (ord('+') & 0xff))
+    # s.setUint16(17,0x0100 | (ord('@') & 0xff))
     # s.setUint16(0x81,0x0124)
     # s.setUint16(0x82,0x0124)
     # s.setUint16(0x83,0x0124)

@@ -417,7 +417,8 @@ class CPU():
 
     def step(self):
         instr = self.fetch()
-        self.excute(instr)
+        res = self.excute(instr)
+        return res
 
     def run(self):
         i = 0
@@ -428,6 +429,6 @@ class CPU():
             if self.registers[ip] > 0xfff0:
                 break
             hlt = self.step()
-            if hlt:
+            if (hlt == True):
                 break
 
