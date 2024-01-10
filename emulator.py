@@ -33,7 +33,7 @@ def process():
 
 if __name__ == '__main__':
     for index in range(256):
-        writeCharToScreen("+",0x01,index)
+        writeCharToScreen("A",0x01,index)
     ram.raw_mem[i]=Instruction.PSH_LIT;i+=1
     ram.raw_mem[i]=0;i+=1
     ram.raw_mem[i]=0;i+=1
@@ -42,10 +42,12 @@ if __name__ == '__main__':
     ram.raw_mem[i]=(waitSubroutineAddress&0xff00)>>8;i+=1
     ram.raw_mem[i]=(waitSubroutineAddress&0xff);i+=1
     for index in range(256):
-        writeCharToScreen("-",0x01,index)
-    ram.raw_mem[i]=0xFF;i+=1
-    ram.raw_mem[i]=0xFF;i+=1
-    ram.raw_mem[i]=0xFF;i+=1
+        writeCharToScreen(".",0x01,index)
+
+    ram.raw_mem[i]=Instruction.MOV_LIT_REG;i+=1
+    ram.raw_mem[i]=0;i+=1
+    ram.raw_mem[i]=0;i+=1
+    ram.raw_mem[i]=ip;i+=1
 
     i = waitSubroutineAddress
     ram.raw_mem[i]=Instruction.MOV_LIT_REG;i+=1
