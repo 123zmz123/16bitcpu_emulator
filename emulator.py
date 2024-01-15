@@ -30,8 +30,9 @@ def process():
     ram_unit.map(ram,0x3100,0xffff)
     _16bit=CPU(ram_unit)
     _16bit.run()
-
-if __name__ == '__main__':
+    _16bit.debug()
+def in_finite_screen_refresh():
+    global i
     for index in range(256):
         writeCharToScreen("A",0x01,index)
     ram.raw_mem[i]=Instruction.PSH_LIT;i+=1
@@ -73,12 +74,73 @@ if __name__ == '__main__':
     ram.raw_mem[i]=(loopStart & 0xff);i+=1
 
     ram.raw_mem[i]=Instruction.RET;i+=1
+    pass
 
+def test_MOV_REG_PTR_REG():
+    global i
+    i=0
+    ram.raw_mem[i]= Instruction.MOV_LIT_REG;i+=1
+    ram.raw_mem[i]=0x10;i+=1
+    ram.raw_mem[i]=0x10;i+=1
+    ram.raw_mem[i]=r1;i+=1
 
+    ram.raw_mem[i]=Instruction.MOV_REG_PTR_REG;i+=1
+    ram.raw_mem[i]=r1;i+=1
+    ram.raw_mem[i]=r2;i+=1
+    ram.raw_mem[i]=0xFF;i+1
+    i=0x1010
+    ram.raw_mem[i]=0x44;i+=1
+    ram.raw_mem[i]=0x77;i+=1
+    pass
 
+def test_MOV_LIT_OFF_REG():
+    global i
+    i=0
+    ram.raw_mem[i]=Instruction.MOV_LIT_REG;i+=1
+    ram.raw_mem[i]=0x00;i+=1
+    ram.raw_mem[i]=0x02;i+=1
+    ram.raw_mem[i]=r1;i+=1
 
+    ram.raw_mem[i]=Instruction.MOV_LIT_OFF_REG;i+=1
+    ram.raw_mem[i]=0x10;i+=1
+    ram.raw_mem[i]=0x10;i+=1
+    ram.raw_mem[i]=r1;i+=1
+    ram.raw_mem[i]=r2;i+=1
+    ram.raw_mem[i]=0xFF;i+=1
+    i = 0x1012
+    ram.raw_mem[i]=0x13;i+=1
+    ram.raw_mem[i]=0x14;i+=1
+    pass
 
+def test_ADD_LIT_REG():
+    global i
+    ram.raw_mem[i]=Instruction.ADD_LIT_REG;i+=1
+    ram.raw_mem[i]=0x11;i+=1
+    ram.raw_mem[i]=0x21;i+=1
+    ram.raw_mem[i]=r2;i+=1
+    ram.raw_mem[i]=0xFF;i+=1
+
+def test_SUB_LIT_REG():
+    global i
+    ram.raw_mem[i]=Instruction.SUB_LIT_REG;i+=1
+    ram.raw_mem[i]=0x1;i+=1
+    ram.raw_mem[i]=0x1;i+=1
+    ram.raw_mem[i]=r1;i+=1
+    ram.raw_mem[i]=0xFF;i+=1
+
+def test_SUB_REG_LIT():
+    global i
+    ram.raw_mem[i]=Instruction.SUB_REG_LIT;i+=1
+    ram.raw_mem[i]=r1;i+=1
+    ram.raw_mem[i]=0x02;i+=1
+    ram.raw_mem[i]=0x03;i+=1
+    ram.raw_mem[i]=0xFF;i+=1
+
+if __name__ == '__main__':
+    # in_finite_screen_refresh()
+    test_SUB_REG_LIT()
     process()
+    
     # _16bit = CPU(ram)
     # _16bit.step()
     # _16bit.viewMemoryAt(0xffff-7)
